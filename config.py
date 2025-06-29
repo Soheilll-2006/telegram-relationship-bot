@@ -16,18 +16,18 @@ class Config:
         self.bot_token = self.get_env_var('BOT_TOKEN')
         self.group_id = self.get_env_var('GROUP_ID')
         
-        # Relationship start date (you can modify this)
+        # Relationship start date
         self.relationship_start_date = self.get_relationship_start_date()
         
         # Partner birthdays (format: MM-DD)
-        self.partner1_birthday = os.getenv('PARTNER1_BIRTHDAY', '09-23')  # September 23
-        self.partner2_birthday = os.getenv('PARTNER2_BIRTHDAY', '11-07')  # November 7
+        self.partner1_birthday = os.getenv('PARTNER1_BIRTHDAY', '09-22')  # September 22
+        self.partner2_birthday = os.getenv('PARTNER2_BIRTHDAY', '11-05')  # November 5
         
         # Partner names
         self.partner1_name = os.getenv('PARTNER1_NAME', 'سهیل')
         self.partner2_name = os.getenv('PARTNER2_NAME', 'شمیم')
         
-        # Daily message time (24-hour format)
+        # Daily message time (24-hour format, Asia/Tehran)
         self.daily_message_hour = int(os.getenv('DAILY_MESSAGE_HOUR', '9'))
         self.daily_message_minute = int(os.getenv('DAILY_MESSAGE_MINUTE', '0'))
         

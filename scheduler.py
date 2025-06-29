@@ -9,6 +9,7 @@ import time
 import threading
 from datetime import datetime, date
 import logging
+import pytz
 from config import Config
 from utils import calculate_days_together
 
@@ -18,14 +19,20 @@ def start_scheduler(bot):
     """Start the message scheduler."""
     config = Config()
     
-    # Schedule daily messages
-    schedule_time = f"{config.daily_message_hour:02d}:{config.daily_message_minute:02d}"
-    schedule.every().day.at(schedule_time).do(send_scheduled_message, bot)
+    # Schedule daily messages at 9:00 AM Asia/Tehran
+    tz = pytz.timezone('Asia/Tehran')
+    schedule_time = datetime.now(tz).replace(
+        hour=config.daily_message_hour,
+        minute=config.daily_message_minute,
+        second=0,
+        microsecond=0
+    ).strftime('%H:%M')
+    schedule.every().day.at(schedule_time, tz).do(send_scheduled_message, bot)
     
-    # Schedule birthday checks
-    schedule.every().day.at("00:01").do(check_birthdays, bot)
+    # Schedule birthday checks at midnight Asia/Tehran
+    schedule.every().day.at("00:01", tz).do(check_birthdays, bot)
     
-    logger.info(f"✅ Scheduler started - Daily messages at {schedule_time}")
+    logger.info(f"✅ Scheduler started - Daily messages at {schedule_time} Asia/Tehran")
     
     # Run scheduler in a loop
     while True:

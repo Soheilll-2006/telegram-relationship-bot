@@ -26,15 +26,18 @@ def calculate_days_together(start_date):
 def is_special_milestone(days):
     """Check if the current day count is a special milestone."""
     special_milestones = [
-        100, 200, 365, 500, 730,  # 100 days, 200 days, 1 year, 500 days, 2 years
-        1000, 1095, 1500, 1825,   # 1000 days, 3 years, 1500 days, 5 years
-        2000, 2555, 3000, 3650    # 2000 days, 7 years, 3000 days, 10 years
+        7, 30, 60, 90, 100, 200, 365, 500, 730,  # Week, month, 2 months, 3 months, etc.
+        1000, 1095, 1500, 1825, 2000, 2555, 3000, 3650  # 1000 days, 3 years, etc.
     ]
     return days in special_milestones
 
 def format_milestone_message(days):
     """Format a milestone message with proper Persian text."""
     try:
+        from quotes import get_random_quote, get_random_advice
+        quote = get_random_quote()
+        advice = get_random_advice()
+        
         message = f"""
 🌹 تبریک! 🌹
 
@@ -43,7 +46,11 @@ def format_milestone_message(days):
 """
         
         # Add special notes for certain milestones
-        if days == 100:
+        if days == 7:
+            message += "🌸 یک هفته کامل عشق! 🌸\n"
+        elif days == 30:
+            message += "🌟 یک ماه عاشقانه! 🌟\n"
+        elif days == 100:
             message += "🎯 صد روز کامل عشق! 🎯\n"
         elif days == 365:
             message += "🎂 یک سال کامل عاشقی! 🎂\n"
@@ -51,6 +58,8 @@ def format_milestone_message(days):
             message += "👑 هزار روز فوق‌العاده! 👑\n"
         elif days % 100 == 0:
             message += f"✨ {days} روز درخشان! ✨\n"
+        elif is_special_milestone(days):
+            message += f"🎉 {days} روز پر از عشق! 🎉\n"
         
         # Calculate years, months, and remaining days
         years = days // 365
@@ -71,7 +80,11 @@ def format_milestone_message(days):
                 message += f" و {final_days} روز"
             message += " از عشق شما!\n"
         
-        message += "\n💖 عشق شما همچنان زیبا و قوی است!"
+        # Add next milestone
+        next_milestone = get_next_milestone(days)
+        message += f"\n⏳ {next_milestone - days} روز تا نقطه عطف بعدی ({next_milestone} روز) باقی مانده!"
+        
+        message += f"\n\n💝 {quote}\n\n💡 توصیه امروز: {advice}\n\n💖 عشق شما همچنان زیبا و قوی است!"
         
         return message.strip()
     
@@ -122,7 +135,7 @@ def validate_date_format(date_string, format_string='%Y-%m-%d'):
 
 def get_next_milestone(current_days):
     """Get the next milestone day count."""
-    milestones = [100, 200, 365, 500, 730, 1000, 1095, 1500, 1825, 2000, 2555, 3000, 3650]
+    milestones = [7, 30, 60, 90, 100, 200, 365, 500, 730, 1000, 1095, 1500, 1825, 2000, 2555, 3000, 3650]
     
     for milestone in milestones:
         if milestone > current_days:

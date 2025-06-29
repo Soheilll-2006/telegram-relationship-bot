@@ -9,6 +9,9 @@ import telebot
 from datetime import datetime, date
 import random
 import logging
+from config import Config
+from quotes import get_random_quote, get_random_advice
+from utils import calculate_days_together, is_special_milestone
 
 # Configure logging
 logging.basicConfig(
@@ -19,57 +22,32 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Bot configuration
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-GROUP_ID = int(os.getenv('GROUP_ID'))
-
-# Relationship info
-RELATIONSHIP_START_DATE = date(2025, 6, 22)
-SOHEIL_BIRTHDAY = (9, 23)  # September 23
-SHAMIM_BIRTHDAY = (11, 7)  # November 7
-
-# Love quotes
-LOVE_QUOTES = [
-    "عشق تنها احساسی است که هرچه بیشتر بدهی، بیشتر داری. 💕",
-    "در عشق، کوچکترین لحظه‌ها بزرگترین خاطره‌ها می‌شوند. 🌹",
-    "عشق یعنی دیدن آینده در چشمان کسی که دوستش داری. 👁️‍🗨️",
-    "هر صبح که چشمانم را باز می‌کنم، خوشحالم که تو در زندگی‌ام هستی. ☀️",
-    "عشق واقعی نیازی به کلمات ندارد، صدای قلب کافی است. 💗",
-    "تو نه تنها عشق زندگی‌ام، بلکه زندگی عشق‌ام هستی. 💖",
-    "عشق زبان مشترک همه قلب‌هاست. 💞",
-    "در دنیای پر از سر و صدا، عشق تو آرامش من است. 🕊️",
-    "عشق یعنی مراقبت، احترام و درک متقابل. 🤝",
-    "هر روز با تو، هدیه‌ای از آسمان است. 🎁"
-]
-
-def calculate_days_together():
-    """Calculate days since relationship started."""
-    today = date.today()
-    delta = today - RELATIONSHIP_START_DATE
-    return delta.days + 1
-
-def is_special_milestone(days):
-    """Check if it's a special milestone."""
-    return days in [100, 200, 365, 500, 730, 1000, 1095, 1500, 1825, 2000]
+config = Config()
+bot = telebot.TeleBot(config.bot_token)
 
 def is_birthday_today():
     """Check if today is someone's birthday."""
     today = date.today()
-    if (today.month, today.day) == SOHEIL_BIRTHDAY:
-        return "سهیل"
-    elif (today.month, today.day) == SHAMIM_BIRTHDAY:
-        return "شمیم"
+    date_str = today.strftime('%m-%d')
+    if date_str == config.partner1_birthday:
+        return config.partner1_name
+    elif date_str == config.partner2_birthday:
+        return config.partner2_name
     return None
 
 def create_daily_message():
     """Create daily relationship message."""
-    days = calculate_days_together()
-    quote = random.choice(LOVE_QUOTES)
+    days = calculate_days_together(config.relationship_start_date)
+    quote = get_random_quote()
+    advice = get_random_advice()
     
     message = f"""🌅 صبح بخیر عزیزان! 🌅
 
 💕 امروز روز {days} از عشق زیبای شماست!
 
-{quote}
+💝 {quote}
+
+💡 توصیه امروز: {advice}
 
 با عشق و احترام ❤️"""
     
@@ -78,7 +56,11 @@ def create_daily_message():
         celebration_emojis = "🎉🎊🥳🎈🎁💐🌹"
         message += f"\n\n{celebration_emojis}\n"
         
-        if days == 100:
+        if days == 7:
+            message += "🌸 یک هفته کامل عشق! 🌸"
+        elif days == 30:
+            message += "🌟 یک ماه عاشقانه! 🌟"
+        elif days == 100:
             message += "🎯 صد روز عشق! 🎯"
         elif days == 200:
             message += "🌟 دویست روز عاشقی! 🌟"
@@ -104,8 +86,7 @@ def create_daily_message():
 def send_message_to_group(message):
     """Send message to Telegram group."""
     try:
-        bot = telebot.TeleBot(BOT_TOKEN)
-        bot.send_message(GROUP_ID, message)
+        bot.send_message(config.group_id, message)
         logger.info("✅ Message sent successfully!")
         return True
     except Exception as e:
@@ -114,7 +95,7 @@ def send_message_to_group(message):
 
 def main():
     """Main function to send daily message."""
-    if not BOT_TOKEN or not GROUP_ID:
+    if not config.bot_token or not config.group_id:
         logger.error("❌ BOT_TOKEN or GROUP_ID not set!")
         return
     
@@ -125,7 +106,7 @@ def main():
     success = send_message_to_group(message)
     
     if success:
-        days = calculate_days_together()
+        days = calculate_days_together(config.relationship_start_date)
         logger.info(f"✅ Daily message sent successfully for day {days}!")
     else:
         logger.error("❌ Failed to send message!")
